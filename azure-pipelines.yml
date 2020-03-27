@@ -42,6 +42,10 @@ stages:
           inputs:
             command: 'test'
             projects: '**/*[Tt]ests'
+        - task: PublishCodeCoverageResults@1
+          inputs:
+            codeCoverageTool: 'Cobertura'
+            summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/site/cobertura/coverage.xml'
         - task: DotNetCoreCLI@2
           displayName: "dotnet publish"
           inputs:
