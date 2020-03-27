@@ -46,7 +46,7 @@ stages:
         # - script: reportgenerator -reports:$(System.DefaultWorkingDirectory)/**/cobertura/coverage.xml -targetdir:$(System.DefaultWorkingDirectory)/CodeCoverage -reporttypes:HtmlInLine_AzurePipelines
         #   displayName: "create code coverage report"
 
-        - script: reportgenerator "-reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml" "-targetDir:$(Build.SourcesDirectory)/TestResults/Coverage/Reports" -tag:$(Build.BuildNumber) -reportTypes:htmlInline
+        - script: dotnet reportgenerator "-reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml" "-targetDir:$(Build.SourcesDirectory)/TestResults/Coverage/Reports" -tag:$(Build.BuildNumber) -reportTypes:htmlInline
           workingDirectory: $(Build.SourcesDirectory)/WebApp.Web.Tests
           displayName: 'dotnet reportgenerator'
         - task: PublishTestResults@2
