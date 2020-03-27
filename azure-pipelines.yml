@@ -111,8 +111,8 @@
               ArtifactName: 'drop'
               publishLocation: 'Container'
   
-    - stage: release
-      displayName: 'deployment-release'
+    # - stage: release
+    #   displayName: 'deployment-release'
   #release job
       # jobs:
       #   - job: release
