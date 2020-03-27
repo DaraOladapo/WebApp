@@ -39,14 +39,8 @@ stages:
             custom: 'tool'
             arguments: 'install --global dotnet-reportgenerator-globaltool'
        
-        - task: DotNetCoreCLI@2
-          displayName: "dotnet test"
-          inputs:
-            command: 'test'
-            projects: '**/*[Tt]ests'
-            arguments: '--no-build --configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage'
-            testRunTitle: 'Unit Test'
-            workingDirectory: '$(Build.SourcesDirectory)'
+        - script: dotnet test WebApp.Web.Tests/WebApp.Web.Tests.csproj --logger "trx;LogFileName=testresults.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=TestResults/Coverage/
+          displayName: 'dotnet test'
         
 
         # - script: reportgenerator -reports:$(System.DefaultWorkingDirectory)/**/cobertura/coverage.xml -targetdir:$(System.DefaultWorkingDirectory)/CodeCoverage -reporttypes:HtmlInLine_AzurePipelines
