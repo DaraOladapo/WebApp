@@ -47,15 +47,28 @@ stages:
             arguments: '--no-build --configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(System.DefaultWorkingDirectory)/TestResults/Coverage'
             testRunTitle: 'Unit Test'
             workingDirectory: '$(System.DefaultWorkingDirectory)'
-        - script: reportgenerator -reports:$(System.DefaultWorkingDirectory)/**/cobertura/coverage.xml -targetdir:$(System.DefaultWorkingDirectory)/CodeCoverage -reporttypes:HtmlInLine_AzurePipelines
-          displayName: "create code coverage report"
         
-        
-        - task: PublishCodeCoverageResults@1
-          displayName: "publish test coverage result"
+
+        # - script: reportgenerator -reports:$(System.DefaultWorkingDirectory)/**/cobertura/coverage.xml -targetdir:$(System.DefaultWorkingDirectory)/CodeCoverage -reporttypes:HtmlInLine_AzurePipelines
+        #   displayName: "create code coverage report"
+        - task: PublishTestResults@2
           inputs:
-            codeCoverageTool: 'Cobertura'
-            summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/cobertura/coverage.xml'
+            testRunner: VSTest
+            testResultsFiles: '**/*.trx'
+            failTaskOnFailedTests: true
+        
+        # - task: PublishCodeCoverageResults@1
+        #   displayName: "publish test coverage result"
+        #   inputs:
+        #     codeCoverageTool: 'Cobertura'
+        #     summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/cobertura/coverage.xml'
+
+        - task: PublishCodeCoverageResults@1
+          inputs:
+            codeCoverageTool: 'cobertura'
+            summaryFileLocation: $(Build.SourcesDirectory)/TestResults/Coverage/**/coverage.cobertura.xml
+            reportDirectory: $(Build.SourcesDirectory)/TestResults/Coverage/Reports
+            failIfCoverageEmpty: false 
         - task: DotNetCoreCLI@2
           displayName: "dotnet publish"
           inputs:
