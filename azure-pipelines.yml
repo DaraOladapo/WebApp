@@ -1,39 +1,136 @@
-name: WebApp-CI
+# name: WebApp-CI
 
-trigger:
-- master
+# trigger:
+# - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+# pool:
+#   vmImage: 'ubuntu-latest'
 
-variables:
-  buildConfiguration: 'Release'
+# variables:
+#   buildConfiguration: 'Release'
 
-steps:
-- task: DotNetCoreInstaller@0
-  displayName: 'Install .NET 3'
-  inputs:
-    version: '3.1.102'
+# steps:
+# - task: DotNetCoreInstaller@0
+#   displayName: 'Install .NET 3'
+#   inputs:
+#     version: '3.1.102'
 
-- script: dotnet build --configuration $(buildConfiguration)
-  displayName: 'dotnet build $(buildConfiguration)'
+# - script: dotnet build --configuration $(buildConfiguration)
+#   displayName: 'dotnet build $(buildConfiguration)'
 
-- script: dotnet test WebApp.Web.Tests/WebApp.Web.Tests.csproj --logger "trx;LogFileName=testresults.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/
-  displayName: 'dotnet test'
+# - script: dotnet test WebApp.Web.Tests/WebApp.Web.Tests.csproj --logger "trx;LogFileName=testresults.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/
+#   displayName: 'dotnet test'
 
-- script: dotnet reportgenerator "-reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml" "-targetDir:$(Build.SourcesDirectory)/TestResults/Coverage/Reports" -tag:$(Build.BuildNumber) -reportTypes:htmlInline
-  workingDirectory: $(Build.SourcesDirectory)/WebApp.Web.Tests
-  displayName: 'dotnet reportgenerator'
+# - script: dotnet reportgenerator "-reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml" "-targetDir:$(Build.SourcesDirectory)/TestResults/Coverage/Reports" -tag:$(Build.BuildNumber) -reportTypes:htmlInline
+#   workingDirectory: $(Build.SourcesDirectory)/WebApp.Web.Tests
+#   displayName: 'dotnet reportgenerator'
 
-- task: PublishTestResults@2
-  inputs:
-    testRunner: VSTest
-    testResultsFiles: '**/*.trx'
-    failTaskOnFailedTests: true
+# - task: PublishTestResults@2
+#   inputs:
+#     testRunner: VSTest
+#     testResultsFiles: '**/*.trx'
+#     failTaskOnFailedTests: true
 
-- task: PublishCodeCoverageResults@1
-  inputs:
-    codeCoverageTool: 'cobertura'
-    summaryFileLocation: $(Build.SourcesDirectory)/TestResults/Coverage/**/coverage.cobertura.xml
-    reportDirectory: $(Build.SourcesDirectory)/TestResults/Coverage/Reports
-    failIfCoverageEmpty: false 
+# - task: PublishCodeCoverageResults@1
+#   inputs:
+#     codeCoverageTool: 'cobertura'
+#     summaryFileLocation: $(Build.SourcesDirectory)/TestResults/Coverage/**/coverage.cobertura.xml
+#     reportDirectory: $(Build.SourcesDirectory)/TestResults/Coverage/Reports
+#     failIfCoverageEmpty: false 
+
+  trigger:
+  - master
+  
+  stages:
+    - stage: build
+      displayName: 'master-branch-build'
+  
+      #build jobs
+      jobs: 
+        - job: build
+          pool:
+            vmImage: 'ubuntu-latest'
+  
+          variables:
+            buildConfiguration: 'Release'
+  
+          steps:
+          - task: UseDotNet@2
+            displayName: "Use .NET"
+            inputs:
+              packageType: 'sdk'
+              version: '3.1.102'
+          - task: DotNetCoreCLI@2
+            displayName: "dotnet restore"
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+              feedsToUse: 'select'
+          - task: DotNetCoreCLI@2
+            displayName: "dotnet build"
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration $(BuildConfiguration)'
+          - task: DotNetCoreCLI@2
+            displayName: "dotnet global test tool install"
+            inputs:
+              command: 'custom'
+              custom: 'tool'
+              arguments: 'install --global dotnet-reportgenerator-globaltool'
+  
+          
+         
+          - script: dotnet test WebApp.Web.Tests/WebApp.Web.Tests.csproj --logger "trx;LogFileName=testresults.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/
+            displayName: 'dotnet test'
+          
+          - script: reportgenerator "-reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml" "-targetDir:$(Build.SourcesDirectory)/TestResults/Coverage/Reports" -tag:$(Build.BuildNumber) -reportTypes:htmlInline
+            workingDirectory: $(Build.SourcesDirectory)/WebApp.Web.Tests
+            displayName: 'dotnet reportgenerator'
+          - task: PublishTestResults@2
+            inputs:
+              testRunner: VSTest
+              testResultsFiles: '**/*.trx'
+              failTaskOnFailedTests: true
+          
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: 'cobertura'
+              summaryFileLocation: $(Build.SourcesDirectory)/TestResults/Coverage/**/coverage.cobertura.xml
+              reportDirectory: $(Build.SourcesDirectory)/TestResults/Coverage/Reports
+              failIfCoverageEmpty: false 
+          - task: DotNetCoreCLI@2
+            displayName: "dotnet publish"
+            inputs:
+              command: 'publish'
+              publishWebProjects: true
+              arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: '$(build.artifactstagingdirectory)'
+              ArtifactName: 'drop'
+              publishLocation: 'Container'
+  
+    - stage: release
+      displayName: 'deployment-release'
+  #release job
+      # jobs:
+      #   - job: release
+      #     pool:
+      #           vmImage: 'ubuntu-latest'
+      #     steps:
+      #     - task: DownloadBuildArtifacts@0
+      #       inputs:
+      #         buildType: 'current'
+      #         downloadType: 'specific'
+      #         itemPattern: '**/*.zip'
+      #         downloadPath: '$(System.ArtifactsDirectory)'
+  
+  
+      #     - task: AzureRmWebAppDeployment@4
+      #       inputs:
+      #         ConnectionType: 'AzureRM'
+      #         azureSubscription: '<subscriptionNameHere>(<subscriptionIdHere>)'
+      #         appType: 'webApp'
+      #         WebAppName: 'appNameHere'
+      #         packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
