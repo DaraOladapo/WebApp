@@ -1,8 +1,3 @@
-# ASP.NET Core
-# Build and test ASP.NET Core projects targeting .NET Core.
-# Add steps that run tests, create a NuGet package, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
-
 trigger:
 - master
 
@@ -49,11 +44,10 @@ stages:
           inputs:
             command: 'test'
             projects: '**/*[Tt]ests'
-            arguments: '--no-build --configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage'
+            arguments: '--no-build --configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(System.DefaultWorkingDirectory)/TestResults/Coverage'
             testRunTitle: 'Unit Test'
-            pubblishTestResults: true
             workingDirectory: '$(System.DefaultWorkingDirectory)'
-        - script: reportgenerator -reports:$(Build.SourcesDirectory)/**/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:HtmlInLine_AzurePipelines
+        - script: reportgenerator -reports:$(System.DefaultWorkingDirectory)/**/cobertura/coverage.xml -targetdir:$(System.DefaultWorkingDirectory)/CodeCoverage -reporttypes:HtmlInLine_AzurePipelines
           displayName: "create code coverage report"
         
         
@@ -61,7 +55,7 @@ stages:
           displayName: "publish test coverage result"
           inputs:
             codeCoverageTool: 'Cobertura'
-            summaryFileLocation: '$(Build.SourcesDirectory)/**/coverage.cobertura.xml'
+            summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/cobertura/coverage.xml'
         - task: DotNetCoreCLI@2
           displayName: "dotnet publish"
           inputs:
