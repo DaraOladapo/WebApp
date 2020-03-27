@@ -52,10 +52,11 @@ stages:
               !**\*TestAdapter.dll
               !**\obj\**
             searchFolder: '$(System.DefaultWorkingDirectory)'
+            testRunTitle: 'VS Test'
         - task: PublishCodeCoverageResults@1
           inputs:
             codeCoverageTool: 'JaCoCo'
-            summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage.xml'
+            summaryFileLocation: '$(System.DefaultWorkingDirectory)'
         - task: DotNetCoreCLI@2
           displayName: "dotnet publish"
           inputs:
