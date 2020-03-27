@@ -37,7 +37,7 @@ stages:
         - task: DotNetCoreCLI@2
           inputs:
             command: 'test'
-            projects: '**/[Tt]ests'
+            projects: '**/*[Tt]ests'
         - task: DotNetCoreCLI@2
           inputs:
             command: 'publish'
