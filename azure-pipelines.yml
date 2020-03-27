@@ -44,19 +44,25 @@ stages:
             projects: '**/*[Tt]ests'
             testRunTitle: 'Unit Test'
             workingDirectory: '$(System.DefaultWorkingDirectory)'
-        # - task: VSTest@2
-        #   inputs:
-        #     testSelector: 'testAssemblies'
-        #     testAssemblyVer2: |
-        #       **\*[Tt]est*.dll
-        #       !**\*TestAdapter.dll
-        #       !**\obj\**
-        #     searchFolder: '$(System.DefaultWorkingDirectory)'
-        #     testRunTitle: 'VS Test'
+        - task: VSTest@2
+          inputs:
+            testSelector: 'testAssemblies'
+            testAssemblyVer2: |
+              **\*[Tt]est*.dll
+              !**\*TestAdapter.dll
+              !**\obj\**
+            searchFolder: '$(System.DefaultWorkingDirectory)'
+            testRunTitle: 'VS Test'
+        - task: PublishTestResults@2
+          inputs:
+            testResultsFormat: 'VSTest'
+            testResultsFiles: '**/TEST-*.xml'
+            mergeTestResults: true
+            testRunTitle: 'VS Test'
         - task: PublishCodeCoverageResults@1
           inputs:
             codeCoverageTool: 'Cobertura'
-            summaryFileLocation: '**/*.trx'
+            summaryFileLocation: '**/TEST-*.xml'
         - task: DotNetCoreCLI@2
           displayName: "dotnet publish"
           inputs:
