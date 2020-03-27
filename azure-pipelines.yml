@@ -53,7 +53,7 @@ stages:
         #   displayName: "create code coverage report"
 
         - script: dotnet reportgenerator "-reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml" "-targetDir:$(Build.SourcesDirectory)/TestResults/Coverage/Reports" -tag:$(Build.BuildNumber) -reportTypes:htmlInline
-          workingDirectory: $(Build.SourcesDirectory)/BuildApp.Web.Tests
+          workingDirectory: $(Build.SourcesDirectory)
           displayName: 'dotnet reportgenerator'
         - task: PublishTestResults@2
           inputs:
