@@ -38,15 +38,13 @@ stages:
             command: 'custom'
             custom: 'tool'
             arguments: 'install --global dotnet-reportgenerator-globaltool'
+
+        
        
         - script: dotnet test WebApp.Web.Tests/WebApp.Web.Tests.csproj --logger "trx;LogFileName=testresults.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=TestResults/Coverage/
           displayName: 'dotnet test'
         
-
-        # - script: reportgenerator -reports:$(System.DefaultWorkingDirectory)/**/cobertura/coverage.xml -targetdir:$(System.DefaultWorkingDirectory)/CodeCoverage -reporttypes:HtmlInLine_AzurePipelines
-        #   displayName: "create code coverage report"
-
-        - script: reportgenerator "-reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml" "-targetDir:$(Build.SourcesDirectory)/TestResults/Coverage/Reports" -tag:$(Build.BuildNumber) -reportTypes:htmlInline
+        - script: reportgenerator "-reports:$(Build.SourcesDirectory)/**/**/coverage.cobertura.xml" "-targetDir:$(Build.SourcesDirectory)/TestResults/Coverage/Reports" -tag:$(Build.BuildNumber) -reportTypes:htmlInline
           workingDirectory: $(Build.SourcesDirectory)/WebApp.Web.Tests
           displayName: 'dotnet reportgenerator'
         - task: PublishTestResults@2
@@ -55,12 +53,6 @@ stages:
             testResultsFiles: '**/*.trx'
             failTaskOnFailedTests: true
         
-        # - task: PublishCodeCoverageResults@1
-        #   displayName: "publish test coverage result"
-        #   inputs:
-        #     codeCoverageTool: 'Cobertura'
-        #     summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/cobertura/coverage.xml'
-
         - task: PublishCodeCoverageResults@1
           inputs:
             codeCoverageTool: 'cobertura'
