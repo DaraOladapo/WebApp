@@ -44,6 +44,14 @@ stages:
             projects: '**/*[Tt]ests'
             testRunTitle: 'Unit Test'
             workingDirectory: '$(System.DefaultWorkingDirectory)'
+        - task: VSTest@2
+          inputs:
+            testSelector: 'testAssemblies'
+            testAssemblyVer2: |
+              **\*[Tt]est*.dll
+              !**\*TestAdapter.dll
+              !**\obj\**
+            searchFolder: '$(System.DefaultWorkingDirectory)'
         - task: PublishCodeCoverageResults@1
           inputs:
             codeCoverageTool: 'JaCoCo'
