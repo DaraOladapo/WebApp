@@ -14,7 +14,7 @@ stages:
     jobs: 
       - job: build
         pool:
-          vmImage: 'windows-latest'
+          vmImage: 'ubuntu-latest'
 
         variables:
           buildConfiguration: 'Release'
@@ -38,31 +38,29 @@ stages:
             projects: '**/*.csproj'
             arguments: '--configuration $(BuildConfiguration)'
         - task: DotNetCoreCLI@2
+          displayName: "dotnet global test tool install"
+          inputs:
+            command: 'custom'
+            custom: 'tool'
+            arguments: 'install --global dotnet-reportgenerator-globaltool'
+       
+        - task: DotNetCoreCLI@2
           displayName: "dotnet test"
           inputs:
             command: 'test'
             projects: '**/*[Tt]ests'
+            arguments: '--no-build --configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOUtputFormat=cobetura'
             testRunTitle: 'Unit Test'
             workingDirectory: '$(System.DefaultWorkingDirectory)'
-        - task: VSTest@2
-          inputs:
-            testSelector: 'testAssemblies'
-            testAssemblyVer2: |
-              **\*[Tt]est*.dll
-              !**\*TestAdapter.dll
-              !**\obj\**
-            searchFolder: '$(System.DefaultWorkingDirectory)'
-            testRunTitle: 'VS Test'
-        - task: PublishTestResults@2
-          inputs:
-            testResultsFormat: 'VSTest'
-            testResultsFiles: '**/TEST-*.xml'
-            mergeTestResults: true
-            testRunTitle: 'VS Test'
+        - script: reportgenerator -reports:$(Build.SourcesDirectory)/**coverage.corbetura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:HtmlInLine_AzurePipelines
+          displayName: "create code coverage report"
+        
+        
         - task: PublishCodeCoverageResults@1
+          displayName: "publish test coverage result"
           inputs:
             codeCoverageTool: 'Cobertura'
-            summaryFileLocation: '**/TEST-*.xml'
+            summaryFileLocation: '$(Build.SourcesDirectory)/**coverage.corbetura.xml'
         - task: DotNetCoreCLI@2
           displayName: "dotnet publish"
           inputs:
