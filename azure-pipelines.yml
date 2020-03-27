@@ -55,8 +55,8 @@ stages:
         #     testRunTitle: 'VS Test'
         - task: PublishCodeCoverageResults@1
           inputs:
-            codeCoverageTool: 'JaCoCo'
-            summaryFileLocation: '$(Agent.TempDirectory)/*.trx'
+            codeCoverageTool: 'Cobertura'
+            summaryFileLocation: '**/*.trx'
         - task: DotNetCoreCLI@2
           displayName: "dotnet publish"
           inputs:
