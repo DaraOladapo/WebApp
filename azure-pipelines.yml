@@ -44,13 +44,17 @@ stages:
           inputs:
             command: 'test'
             projects: '**/*[Tt]ests'
-            arguments: '--no-build --configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(System.DefaultWorkingDirectory)/TestResults/Coverage'
+            arguments: '--no-build --configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage'
             testRunTitle: 'Unit Test'
-            workingDirectory: '$(System.DefaultWorkingDirectory)'
+            workingDirectory: '$(Build.SourcesDirectory)'
         
 
         # - script: reportgenerator -reports:$(System.DefaultWorkingDirectory)/**/cobertura/coverage.xml -targetdir:$(System.DefaultWorkingDirectory)/CodeCoverage -reporttypes:HtmlInLine_AzurePipelines
         #   displayName: "create code coverage report"
+
+        - script: dotnet reportgenerator "-reports:$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml" "-targetDir:$(Build.SourcesDirectory)/TestResults/Coverage/Reports" -tag:$(Build.BuildNumber) -reportTypes:htmlInline
+          workingDirectory: $(Build.SourcesDirectory)/BuildApp.Web.Tests
+          displayName: 'dotnet reportgenerator'
         - task: PublishTestResults@2
           inputs:
             testRunner: VSTest
