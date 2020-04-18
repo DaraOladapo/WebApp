@@ -10,21 +10,25 @@ variables:
 
 steps:
 - task: DotNetCoreCLI@2
+  displayName: "Build Project"
   inputs:
     command: 'build'
     projects: '**/*.csproj'
 
 - task: DotNetCoreCLI@2
+  displayName: "Test Project"
   inputs:
     command: 'test'
     projects: '**/*.csproj'
     testRunTitle: 'Unit Test'
 - task: DotNetCoreCLI@2
+  displayName: "Publish Project to Artifacts Directory"
   inputs:
     command: 'publish'
     publishWebProjects: true
     arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
 - task: PublishBuildArtifacts@1
+  displayName: "Drop Artifacts"
   inputs:
     PathtoPublish: '$(build.artifactstagingdirectory)'
     ArtifactName: 'drop'
