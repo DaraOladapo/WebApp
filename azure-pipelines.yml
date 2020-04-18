@@ -25,6 +25,7 @@ stages:
         inputs:
           command: 'test'
           projects: '**/*.csproj'
+          publishTestResults: false
           testRunTitle: 'Unit Test'
       - task: DotNetCoreCLI@2
         displayName: "Publish Project to Artifacts Directory"
@@ -38,27 +39,31 @@ stages:
           PathtoPublish: '$(build.artifactstagingdirectory)'
           ArtifactName: 'drop'
           publishLocation: 'Container'
- 
-  # - stage: release
-  #   displayName:'Deploy to Dev'
+  - stage: release
+    displayName: "Deploy to Dev"
+    
+    jobs:
+      - job: release
+        displayName: "Dev Env Release"
+        pool:
+          vmImage="ubuntu-latest"
+        steps:
+          - task: DownloadBuildArtifacts@0
+            #displayName:"Download Build Artifacts"
+            inputs:
+              buildType: 'current'
+              downloadType: 'specific'
+              itemPattern: '**/*.zip'
+              downloadPath: '$(System.ArtifactsDirectory)'
 
-  #    jobs:
-  #     - job: release
-  #       pool:
-  #         vmImage: 'ubuntu-latest'
-  #       steps:
-  #       - task: DownloadBuildArtifacts@0
-  #         inputs:
-  #           buildType: 'current'
-  #           downloadType: 'specific'
-  #           itemPattern: '**/*.zip'
-  #           downloadPath: '$(System.ArtifactsDirectory)'
+          - task: AzureRmWebAppDeployment@4
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'MCT-Subscription (a83c833d-7492-46ac-b3cb-d787ea08851a)'
+              appType: 'webApp'
+              WebAppName: 'sds-gwl-demo'
+              deployToSlotOrASE: true
+              ResourceGroupName: 'dev-and-demos'
+              SlotName: 'dev'
+              packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
 
-
-  #       - task: AzureRmWebAppDeployment@4
-  #         inputs:
-  #           ConnectionType: 'AzureRM'
-  #           azureSubscription: 'MCT-Subscription (a83c833d-7492-46ac-b3cb-d787ea08851a)'
-  #           appType: 'webApp'
-  #           WebAppName: 'sds-gwl-demo'
-  #           packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
