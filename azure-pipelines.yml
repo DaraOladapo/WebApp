@@ -70,19 +70,6 @@ stages:
   - stage: prodrelease
     displayName: "Deploy to Production"
     jobs:
-      - job: release
-        displayName: "Artifacts Download"
-        pool:
-          vmImage: 'ubuntu-latest'
-        steps:
-          - task: DownloadBuildArtifacts@0
-            displayName: 'Download Build Artifacts'
-            inputs:
-              buildType: 'current'
-              downloadType: 'specific'
-              itemPattern: '**/*.zip'
-              downloadPath: '$(System.ArtifactsDirectory)'
-
       - deployment: prodenvrelease
         displayName: "Prod Env Release"
         pool:
