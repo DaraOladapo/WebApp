@@ -39,7 +39,7 @@ stages:
           PathtoPublish: '$(build.artifactstagingdirectory)'
           ArtifactName: 'drop'
           publishLocation: 'Container'
-  - stage: release
+  - stage: devrelease
     displayName: "Deploy to Dev"
     
     jobs:
@@ -66,4 +66,6 @@ stages:
               ResourceGroupName: 'dev-and-demos'
               SlotName: 'dev'
               packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
-
+  - stage: prodrelease
+    displayName: "Deploy to Production"
+    
