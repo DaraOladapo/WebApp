@@ -33,3 +33,10 @@ steps:
     PathtoPublish: '$(build.artifactstagingdirectory)'
     ArtifactName: 'drop'
     publishLocation: 'Container'
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'MCT-Subscription (a83c833d-7492-46ac-b3cb-d787ea08851a)'
+    appType: 'webAppLinux'
+    WebAppName: 'sds-gwl-demo'
+    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
