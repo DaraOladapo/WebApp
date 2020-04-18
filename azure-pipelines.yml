@@ -83,8 +83,8 @@ stages:
               itemPattern: '**/*.zip'
               downloadPath: '$(System.ArtifactsDirectory)'
 
-      - deployment: release
-        displayName: "Dev Env Release"
+      - deployment: prodenvrelease
+        displayName: "Prod Env Release"
         pool:
           vmImage: 'ubuntu-latest'
         
