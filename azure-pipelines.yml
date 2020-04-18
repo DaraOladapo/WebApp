@@ -49,7 +49,7 @@ stages:
           vmImage: 'ubuntu-latest'
         steps:
           - task: DownloadBuildArtifacts@0
-            #displayName:"Download Build Artifacts"
+            displayName: 'Download Build Artifacts'
             inputs:
               buildType: 'current'
               downloadType: 'specific'
@@ -79,9 +79,17 @@ stages:
         runOnce:
           deploy:
             steps:
-              - task: AzureRmWebAppDeployment@4
-                displayName: "Deploy to Production"
-                inputs:
+             - task: DownloadBuildArtifacts@0
+               displayName: 'Download Build Artifacts'
+               inputs:
+                  buildType: 'current'
+                  downloadType: 'specific'
+                  itemPattern: '**/*.zip'
+                  downloadPath: '$(System.ArtifactsDirectory)'
+
+             - task: AzureRmWebAppDeployment@4
+               displayName: "Deploy to Production"
+               inputs:
                   ConnectionType: 'AzureRM'
                   azureSubscription: 'MCT-Subscription (a83c833d-7492-46ac-b3cb-d787ea08851a)'
                   appType: 'webApp'
