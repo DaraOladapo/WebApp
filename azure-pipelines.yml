@@ -1,43 +1,64 @@
-
 trigger:
 - master
-
-pool:
-  vmImage: 'ubuntu-latest'
-
 variables:
   buildConfiguration: 'Release'
 
-steps:
-- task: DotNetCoreCLI@2
-  displayName: "Build Project"
-  inputs:
-    command: 'build'
-    projects: '**/*.csproj'
+stages:
+  - stage: build
+    displayName: 'Build & Test'
 
-- task: DotNetCoreCLI@2
-  displayName: "Test Project"
-  inputs:
-    command: 'test'
-    projects: '**/*.csproj'
-    testRunTitle: 'Unit Test'
-- task: DotNetCoreCLI@2
-  displayName: "Publish Project to Artifacts Directory"
-  inputs:
-    command: 'publish'
-    publishWebProjects: true
-    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
-- task: PublishBuildArtifacts@1
-  displayName: "Drop Artifacts"
-  inputs:
-    PathtoPublish: '$(build.artifactstagingdirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
-- task: AzureRmWebAppDeployment@4
-  displayName: "Deploy Project to Azure"
-  inputs:
-    ConnectionType: 'AzureRM'
-    azureSubscription: 'MCT-Subscription (a83c833d-7492-46ac-b3cb-d787ea08851a)'
-    appType: 'webAppLinux'
-    WebAppName: 'sds-gwl-demo'
-    packageForLinux: '$(build.artifactstagingdirectory)/**/*.zip'
+    #build jobs
+    jobs: 
+    - job: build
+      displayName: 'Linux Build'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+      - task: DotNetCoreCLI@2
+        displayName: "Build Project"
+        inputs:
+          command: 'build'
+          projects: '**/*.csproj'
+
+      - task: DotNetCoreCLI@2
+        displayName: "Test Project"
+        inputs:
+          command: 'test'
+          projects: '**/*.csproj'
+          testRunTitle: 'Unit Test'
+      - task: DotNetCoreCLI@2
+        displayName: "Publish Project to Artifacts Directory"
+        inputs:
+          command: 'publish'
+          publishWebProjects: true
+          arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+      - task: PublishBuildArtifacts@1
+        displayName: "Drop Artifacts"
+        inputs:
+          PathtoPublish: '$(build.artifactstagingdirectory)'
+          ArtifactName: 'drop'
+          publishLocation: 'Container'
+ 
+  # - stage: release
+  #   displayName:'Deploy to Dev'
+
+  #    jobs:
+  #     - job: release
+  #       pool:
+  #         vmImage: 'ubuntu-latest'
+  #       steps:
+  #       - task: DownloadBuildArtifacts@0
+  #         inputs:
+  #           buildType: 'current'
+  #           downloadType: 'specific'
+  #           itemPattern: '**/*.zip'
+  #           downloadPath: '$(System.ArtifactsDirectory)'
+
+
+  #       - task: AzureRmWebAppDeployment@4
+  #         inputs:
+  #           ConnectionType: 'AzureRM'
+  #           azureSubscription: 'MCT-Subscription (a83c833d-7492-46ac-b3cb-d787ea08851a)'
+  #           appType: 'webApp'
+  #           WebAppName: 'sds-gwl-demo'
+  #           packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
