@@ -57,6 +57,7 @@ stages:
               downloadPath: '$(System.ArtifactsDirectory)'
 
           - task: AzureRmWebAppDeployment@4
+            displayName: "Deploy to Dev"
             inputs:
               ConnectionType: 'AzureRM'
               azureSubscription: 'MCT-Subscription (a83c833d-7492-46ac-b3cb-d787ea08851a)'
@@ -68,4 +69,22 @@ stages:
               packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
   - stage: prodrelease
     displayName: "Deploy to Production"
+    jobs:
+    - deployment: release
+      displayName: "Dev Env Release"
+      pool:
+        vmImage: 'ubuntu-latest'
+      environment: 'smarthotel-dev'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - task: AzureRmWebAppDeployment@4
+                displayName: "Deploy to Production"
+                inputs:
+                  ConnectionType: 'AzureRM'
+                  azureSubscription: 'MCT-Subscription (a83c833d-7492-46ac-b3cb-d787ea08851a)'
+                  appType: 'webApp'
+                  WebAppName: 'sds-gwl-demo'
+                  packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
     
